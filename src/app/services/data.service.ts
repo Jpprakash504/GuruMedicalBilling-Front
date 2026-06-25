@@ -1,8 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
+import { environment } from 'src/environment';
 
-export const API_URL = 'http://localhost:3000/api';
+// export const API_URL = 'http://localhost:3000/api';
+export const API_URL =environment.apiUrl
 
 @Injectable({ providedIn: 'root' })
 export class DataService {

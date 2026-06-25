@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { environment } from 'src/environment';
 
-export const API_URL = 'http://localhost:3000/api'; // Change to your server URL in production
+// export const API_URL = 'http://localhost:3000/api'; // Change to your server URL in production
+export const API_URL =environment.apiUrl
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
