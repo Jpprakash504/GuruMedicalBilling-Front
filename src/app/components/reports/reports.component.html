@@ -1,0 +1,154 @@
+<!-- reports.component.html -->
+<div class="page-header">
+  <div>
+    <div class="page-title">Reports & Analytics</div>
+    <div class="page-subtitle">Sales performance and inventory insights</div>
+  </div>
+  <button class="btn btn-ghost" onclick="window.print()">🖨️ Print Report</button>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">Loading reports...</div>
+} @else {
+
+  <!-- KPI Stats -->
+  <div class="grid-4 mb-2">
+    <div class="stat-card" style="border-left:4px solid #2563eb;">
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-value" style="color:#2563eb;">₹{{ totalRevenue() | number:'1.0-0' }}</div>
+      <div class="stat-sub">All time</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid #16a34a;">
+      <div class="stat-label">Total Bills</div>
+      <div class="stat-value" style="color:#16a34a;">{{ totalBills() }}</div>
+      <div class="stat-sub">Completed</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid #7c3aed;">
+      <div class="stat-label">Avg Bill Value</div>
+      <div class="stat-value" style="color:#7c3aed;">₹{{ avgBill() | number:'1.0-0' }}</div>
+      <div class="stat-sub">Per transaction</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid #d97706;">
+      <div class="stat-label">Stock Value</div>
+      <div class="stat-value" style="color:#d97706;">₹{{ stockValue() | number:'1.0-0' }}</div>
+      <div class="stat-sub">Current inventory</div>
+    </div>
+  </div>
+
+  <div class="grid-2 mb-2">
+    <!-- Monthly Sales Chart -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Monthly Sales</span></div>
+      <div class="chart-wrap">
+        @for (d of salesData(); track d.month) {
+          <div class="bar-col">
+            <div class="bar-val-top">₹{{ d.sales / 1000 | number:'1.0-0' }}k</div>
+            <div class="bar-outer">
+              <div class="bar-fill" [style.height.%]="maxSales() > 0 ? (d.sales / maxSales()) * 100 : 5"></div>
+            </div>
+            <div class="bar-month">{{ d.month }}</div>
+          </div>
+        }
+        @if (salesData().length === 0) {
+          <div class="empty-chart">No sales data yet</div>
+        }
+      </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Stock by Category</span></div>
+      @for (cat of categoryData(); track cat.category) {
+        <div class="cat-row">
+          <div class="cat-info">
+            <div class="fw-600 cat-name">{{ cat.category }}</div>
+            <div class="cat-sub">{{ cat.count }} units · ₹{{ cat.value | number:'1.0-0' }}</div>
+          </div>
+          <div class="cat-bar-wrap">
+            <div class="cat-bar" [style.width.%]="maxCatValue() > 0 ? (cat.value / maxCatValue()) * 100 : 5"></div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="grid-2 mb-2">
+    <!-- Payment Breakdown -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Payment Mode</span></div>
+      @for (pm of paymentData(); track pm.mode) {
+        <div class="pm-row">
+          <div class="pm-icon">{{ pm.mode === 'cash' ? '💵' : pm.mode === 'card' ? '💳' : '📱' }}</div>
+          <div class="pm-content">
+            <div class="pm-header">
+              <span class="pm-mode">{{ pm.mode }}</span>
+              <span class="fw-600">₹{{ pm.amount | number:'1.0-0' }}</span>
+            </div>
+            <div class="pm-bar-wrap">
+              <div class="pm-bar" [style.width.%]="pm.pct" [style.background]="pm.color"></div>
+            </div>
+          </div>
+        </div>
+      }
+      @if (paymentData().length === 0) {
+        <div class="empty-state-sm">No payment data yet</div>
+      }
+    </div>
+
+    <!-- Top Medicines -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Top Selling Medicines</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Medicine</th><th>Qty</th><th>Revenue</th></tr></thead>
+          <tbody>
+            @for (item of topMedicines(); track item.name; let i = $index) {
+              <tr>
+                <td>
+                  <span class="rank" [class]="i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''">
+                    {{ i + 1 }}
+                  </span>
+                </td>
+                <td class="fw-600">{{ item.name }}</td>
+                <td>{{ item.qty }}</td>
+                <td class="fw-600 text-primary">₹{{ item.revenue | number:'1.0-0' }}</td>
+              </tr>
+            }
+            @if (topMedicines().length === 0) {
+              <tr><td colspan="4" class="empty-cell">No data yet</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Bills -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">All Bills</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Bill No</th><th>Date</th><th>Customer</th><th>Doctor</th><th>Discount</th><th>GST</th><th>Total</th><th>Mode</th></tr>
+        </thead>
+        <tbody>
+          @for (bill of allBills(); track bill.id) {
+            <tr>
+              <td class="font-mono text-primary">{{ bill.billNo }}</td>
+              <td>{{ bill.date }}</td>
+              <td>{{ bill.customerName }}</td>
+              <td>{{ bill.doctorName || '—' }}</td>
+              <td class="text-danger">- ₹{{ bill.totalDiscount | number:'1.2-2' }}</td>
+              <td>₹{{ bill.totalGst | number:'1.2-2' }}</td>
+              <td class="fw-600">₹{{ bill.grandTotal | number:'1.2-2' }}</td>
+              <td><span class="badge badge-gray pay-mode">{{ bill.paymentMode }}</span></td>
+            </tr>
+          }
+          @if (allBills().length === 0) {
+            <tr><td colspan="8" class="empty-cell">No bills yet</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

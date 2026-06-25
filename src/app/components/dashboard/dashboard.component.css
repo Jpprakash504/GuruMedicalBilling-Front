@@ -1,0 +1,59 @@
+/* dashboard.component.css */
+.loading-state { text-align: center; color: #64748b; padding: 3rem; }
+
+.stat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.stat-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.stat-icon.blue { background: #eff6ff; }
+.stat-icon.green { background: #f0fdf4; }
+.stat-icon.yellow { background: #fffbeb; }
+.stat-icon.purple { background: #fdf4ff; }
+
+.stat-value { font-size: 26px; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1; margin-bottom: 4px; }
+.stat-value.blue { color: #2563eb; }
+.stat-value.green { color: #16a34a; }
+.stat-value.yellow { color: #d97706; }
+.stat-value.purple { color: #7c3aed; }
+
+.view-all { font-size: 12px; color: #2563eb; text-decoration: none; }
+.view-all:hover { text-decoration: underline; }
+
+.bill-no { color: #2563eb; }
+
+.empty-cell { text-align: center; color: #64748b; padding: 1.5rem; }
+
+.healthy-msg { text-align: center; color: #64748b; padding: 2rem; }
+
+.alert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.alert-row:last-child { border-bottom: none; }
+.alert-name { font-size: 13px; font-weight: 500; }
+.alert-sub { font-size: 11px; color: #64748b; }
+
+/* Chart */
+.chart-area {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  height: 160px;
+  padding-top: 1rem;
+}
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; }
+.bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+.bar {
+  width: 100%;
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  border-radius: 4px 4px 0 0;
+  min-height: 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  transition: height 0.3s;
+}
+.bar-val { font-size: 10px; color: #fff; font-weight: 600; padding-top: 4px; }
+.bar-label { font-size: 11px; color: #64748b; font-weight: 500; }
+.empty-chart { color: #64748b; text-align: center; width: 100%; padding: 2rem; }

@@ -1,0 +1,197 @@
+<!-- stock.component.html -->
+<div class="page-header">
+  <div>
+    <div class="page-title">Stock Management</div>
+    <div class="page-subtitle">Manage medicine inventory</div>
+  </div>
+  <button class="btn btn-primary" (click)="openAdd()">+ Add Medicine</button>
+</div>
+
+<!-- Filters -->
+<div class="card mb-2">
+  <div class="filter-row">
+    <input class="form-control filter-input" placeholder="Search medicines..."
+      [(ngModel)]="search" />
+    <select class="form-control filter-select" [(ngModel)]="filterCategory">
+      <option value="">All Categories</option>
+      @for (cat of categories(); track cat) {
+        <option [value]="cat">{{ cat }}</option>
+      }
+    </select>
+    <select class="form-control filter-select" [(ngModel)]="filterStock">
+      <option value="">All Stock</option>
+      <option value="low">Low Stock</option>
+      <option value="ok">In Stock</option>
+      <option value="expiring">Expiring Soon</option>
+    </select>
+    <span class="filter-count">{{ filtered().length }} medicines</span>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Medicine Name</th>
+          <th>Category</th>
+          <th>Manufacturer</th>
+          <th>Batch</th>
+          <th>Expiry</th>
+          <th>Stock</th>
+          <th>Buy Price</th>
+          <th>Sell Price</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (med of filtered(); track med.id; let i = $index) {
+          <tr>
+            <td class="text-muted">{{ i + 1 }}</td>
+            <td>
+              <div class="fw-600">{{ med.name }}</div>
+              <div class="med-generic">{{ med.genericName }}</div>
+            </td>
+            <td><span class="badge badge-primary">{{ med.category }}</span></td>
+            <td>{{ med.manufacturer }}</td>
+            <td class="font-mono batch-no">{{ med.batchNo }}</td>
+            <td [class]="isExpiringSoon(med.expiryDate) ? 'text-warning fw-600' : ''">
+              {{ med.expiryDate }}
+            </td>
+            <td>
+              <span class="stock-pill" [class]="med.stock <= med.minStock ? 'stock-low' : 'stock-ok'">
+                {{ med.stock }} {{ med.unit }}
+              </span>
+            </td>
+            <td>₹{{ med.purchasePrice }}</td>
+            <td class="fw-600 text-primary">₹{{ med.sellingPrice }}</td>
+            <td>
+              @if (med.stock === 0) {
+                <span class="badge badge-danger">Out of Stock</span>
+              } @else if (med.stock <= med.minStock) {
+                <span class="badge badge-warning">Low Stock</span>
+              } @else if (isExpiringSoon(med.expiryDate)) {
+                <span class="badge badge-warning">Expiring</span>
+              } @else {
+                <span class="badge badge-success">Active</span>
+              }
+            </td>
+            <td>
+              <div class="action-btns">
+                <button class="btn btn-outline btn-sm" (click)="openRestock(med)">+Stock</button>
+                <button class="btn btn-ghost btn-sm" (click)="openEdit(med)">✏️</button>
+                <button class="btn btn-danger btn-sm" (click)="deleteMed(med.id)">🗑</button>
+              </div>
+            </td>
+          </tr>
+        }
+        @if (filtered().length === 0) {
+          <tr><td colspan="11" class="empty-cell">No medicines found</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add / Edit Modal -->
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editMode() ? 'Edit Medicine' : 'Add New Medicine' }}</h3>
+        <button class="btn btn-ghost btn-sm" (click)="closeForm()">✕</button>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Medicine Name *</label>
+          <input class="form-control" [(ngModel)]="form.name" placeholder="Brand name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Generic Name</label>
+          <input class="form-control" [(ngModel)]="form.genericName" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <input class="form-control" [(ngModel)]="form.category" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Manufacturer</label>
+          <input class="form-control" [(ngModel)]="form.manufacturer" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Batch No</label>
+          <input class="form-control" [(ngModel)]="form.batchNo" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiry Date</label>
+          <input class="form-control" type="date" [(ngModel)]="form.expiryDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Price (₹)</label>
+          <input class="form-control" type="number" [(ngModel)]="form.purchasePrice" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Selling Price (₹)</label>
+          <input class="form-control" type="number" [(ngModel)]="form.sellingPrice" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock Quantity</label>
+          <input class="form-control" type="number" [(ngModel)]="form.stock" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Min Stock (Alert)</label>
+          <input class="form-control" type="number" [(ngModel)]="form.minStock" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit</label>
+          <select class="form-control" [(ngModel)]="form.unit">
+            <option>Strip</option><option>Tablet</option><option>Capsule</option>
+            <option>Bottle</option><option>Syrup</option><option>Injection</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">GST %</label>
+          <select class="form-control" [(ngModel)]="form.gst">
+            <option [value]="0">0%</option>
+            <option [value]="5">5%</option>
+            <option [value]="12">12%</option>
+            <option [value]="18">18%</option>
+          </select>
+        </div>
+      </div>
+      @if (formError()) {
+        <div class="alert alert-danger mt-1">{{ formError() }}</div>
+      }
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="saveForm()">
+          {{ editMode() ? 'Update Medicine' : 'Add Medicine' }}
+        </button>
+        <button class="btn btn-ghost" (click)="closeForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Restock Modal -->
+@if (showRestock()) {
+  <div class="modal-backdrop" (click)="showRestock.set(false)">
+    <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Restock Medicine</h3>
+        <button class="btn btn-ghost btn-sm" (click)="showRestock.set(false)">✕</button>
+      </div>
+      <div class="restock-name fw-600 mb-1">{{ restockMed()?.name }}</div>
+      <div class="restock-stock mb-2">
+        Current Stock: <strong>{{ restockMed()?.stock }} {{ restockMed()?.unit }}</strong>
+      </div>
+      <div class="form-group mb-2">
+        <label class="form-label">Add Quantity</label>
+        <input class="form-control" type="number" [(ngModel)]="restockQty" min="1" />
+      </div>
+      <button class="btn btn-success w-full" (click)="confirmRestock()">Add Stock</button>
+    </div>
+  </div>
+}

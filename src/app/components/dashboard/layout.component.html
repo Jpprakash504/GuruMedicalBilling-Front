@@ -1,0 +1,75 @@
+<!-- layout.component.html -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="collapsed()">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">💊</span>
+        @if (!collapsed()) { <span class="logo-text">Guru Medical</span> }
+      </div>
+      <button class="collapse-btn" (click)="collapsed.set(!collapsed())">
+        {{ collapsed() ? '→' : '←' }}
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        @if (!collapsed()) { <span>Dashboard</span> }
+      </a>
+      <a routerLink="/billing" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🧾</span>
+        @if (!collapsed()) { <span>Billing</span> }
+      </a>
+      <a routerLink="/stock" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📦</span>
+        @if (!collapsed()) {
+          <span>Stock</span>
+          @if (lowStockCount() > 0) {
+            <span class="nav-badge">{{ lowStockCount() }}</span>
+          }
+        }
+      </a>
+      <a routerLink="/medicine-search" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🔍</span>
+        @if (!collapsed()) { <span>Medicines</span> }
+      </a>
+      <a routerLink="/reports" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📊</span>
+        @if (!collapsed()) { <span>Reports</span> }
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      @if (!collapsed()) {
+        <div class="user-info">
+          <div class="user-avatar">{{ userInitials() }}</div>
+          <div>
+            <div class="user-name">{{ user()?.name }}</div>
+            <div class="user-role">{{ user()?.role }}</div>
+          </div>
+        </div>
+      }
+      <button class="btn-logout" (click)="logout()" title="Logout">🚪</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-date">{{ today() }}</div>
+      <div class="topbar-alerts">
+        @if (lowStockCount() > 0) {
+          <div class="alert-chip" routerLink="/stock">
+            ⚠️ {{ lowStockCount() }} low stock
+          </div>
+        }
+      </div>
+    </div>
+    <div class="content-area">
+      <router-outlet />
+    </div>
+  </main>
+
+</div>

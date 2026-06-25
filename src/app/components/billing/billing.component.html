@@ -1,0 +1,263 @@
+<!-- billing.component.html -->
+<div class="page-header no-print">
+  <div>
+    <div class="page-title">Billing</div>
+    <div class="page-subtitle">Create new bills & invoices</div>
+  </div>
+  <button class="btn btn-ghost" (click)="toggleView()">
+    {{ viewBills() ? '+ New Bill' : '📋 Bill History' }}
+  </button>
+</div>
+
+<!-- Bill History -->
+@if (viewBills()) {
+  <div class="card no-print">
+    <div class="card-header">
+      <span class="card-title">Bill History</span>
+      <input class="form-control search-input" placeholder="Search bills..."
+        [(ngModel)]="billSearch" />
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Bill No</th><th>Date</th><th>Customer</th>
+            <th>Doctor</th><th>Items</th><th>Total</th>
+            <th>Payment</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (bill of filteredBills(); track bill.id) {
+            <tr>
+              <td class="font-mono text-primary">{{ bill.billNo }}</td>
+              <td>{{ bill.date }}</td>
+              <td>{{ bill.customerName }}</td>
+              <td>{{ bill.doctorName || '—' }}</td>
+              <td>{{ bill.items?.length || 0 }}</td>
+              <td class="fw-600">₹{{ bill.grandTotal | number:'1.2-2' }}</td>
+              <td><span class="badge badge-gray pay-mode">{{ bill.paymentMode }}</span></td>
+              <td>
+                <span class="badge" [class]="bill.status === 'paid' ? 'badge-success' : 'badge-warning'">
+                  {{ bill.status }}
+                </span>
+              </td>
+            </tr>
+          }
+          @if (filteredBills().length === 0) {
+            <tr><td colspan="8" class="empty-cell">No bills found</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- New Bill Form -->
+@if (!viewBills() && !savedBill()) {
+  <div class="billing-grid no-print">
+
+    <!-- Left Panel -->
+    <div>
+      <!-- Customer Details -->
+      <div class="card mb-2">
+        <div class="card-header"><span class="card-title">Customer Details</span></div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Customer Name *</label>
+            <input class="form-control" [(ngModel)]="customerName" placeholder="Patient name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-control" [(ngModel)]="customerPhone" placeholder="Mobile number" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Doctor Name</label>
+            <input class="form-control" [(ngModel)]="doctorName" placeholder="Referring doctor" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select class="form-control" [(ngModel)]="paymentMode">
+              <option value="cash">Cash</option>
+              <option value="card">Card</option>
+              <option value="upi">UPI</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Medicine -->
+      <div class="card mb-2">
+        <div class="card-header"><span class="card-title">Add Medicine</span></div>
+        <div class="form-group mb-2">
+          <label class="form-label">Search Medicine</label>
+          <input class="form-control" [(ngModel)]="medSearch"
+            (input)="searchMeds()" placeholder="Type medicine name..." />
+        </div>
+
+        @if (searchResults().length > 0 && medSearch) {
+          <div class="search-dropdown">
+            @for (med of searchResults(); track med.id) {
+              <div class="search-item" (click)="selectMedicine(med)">
+                <div>
+                  <div class="med-name">{{ med.name }}</div>
+                  <div class="med-sub">{{ med.manufacturer }} | Stock: {{ med.stock }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="fw-600 text-primary">₹{{ med.sellingPrice }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (selectedMed()) {
+          <div class="selected-med-row">
+            <div class="flex-1">
+              <div class="fw-600">{{ selectedMed()!.name }}</div>
+              <div class="med-sub">MRP: ₹{{ selectedMed()!.sellingPrice }} | Stock: {{ selectedMed()!.stock }}</div>
+            </div>
+            <div class="form-group qty-group">
+              <label class="form-label">Qty</label>
+              <input class="form-control" type="number" [(ngModel)]="addQty"
+                min="1" [max]="selectedMed()!.stock" />
+            </div>
+            <div class="form-group qty-group">
+              <label class="form-label">Disc %</label>
+              <input class="form-control" type="number" [(ngModel)]="addDiscount" min="0" max="100" />
+            </div>
+            <button class="btn btn-primary add-btn" (click)="addItem()">Add</button>
+          </div>
+        }
+      </div>
+
+      <!-- Items Table -->
+      @if (items().length > 0) {
+        <div class="card">
+          <div class="card-header"><span class="card-title">Bill Items</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Medicine</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>GST%</th><th>Total</th><th></th></tr>
+              </thead>
+              <tbody>
+                @for (item of items(); track item.medicine.id; let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>
+                      <div class="fw-600">{{ item.medicine.name }}</div>
+                      <div class="med-sub">Batch: {{ item.medicine.batchNo }}</div>
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.medicine.sellingPrice }}</td>
+                    <td>{{ item.discount }}%</td>
+                    <td>{{ item.medicine.gst }}%</td>
+                    <td class="fw-600">₹{{ item.total | number:'1.2-2' }}</td>
+                    <td>
+                      <button class="btn btn-danger btn-sm" (click)="removeItem(i)">✕</button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Right Panel: Summary -->
+    <div>
+      <div class="card summary-card">
+        <div class="card-header"><span class="card-title">Bill Summary</span></div>
+        <div class="summary-row"><span>Subtotal</span><span>₹{{ subtotal() | number:'1.2-2' }}</span></div>
+        <div class="summary-row"><span>Discount</span><span class="text-danger">- ₹{{ totalDiscount() | number:'1.2-2' }}</span></div>
+        <div class="summary-row"><span>GST</span><span>₹{{ totalGst() | number:'1.2-2' }}</span></div>
+        <div class="summary-row total-row">
+          <span>Grand Total</span>
+          <span>₹{{ grandTotal() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-actions">
+          <button class="btn btn-success w-full"
+            (click)="saveBill()"
+            [disabled]="items().length === 0 || !customerName || saving()">
+            {{ saving() ? 'Saving...' : '✅ Save & Print Bill' }}
+          </button>
+          <button class="btn btn-ghost w-full" (click)="clearBill()">🗑 Clear</button>
+        </div>
+        @if (items().length === 0) {
+          <div class="empty-summary">Add medicines to generate bill</div>
+        }
+      </div>
+    </div>
+
+  </div>
+}
+
+<!-- Invoice Print View -->
+@if (!viewBills() && savedBill()) {
+  <div class="invoice">
+    <div class="invoice-header">
+      <div>
+        <div class="invoice-shop">💊 MediShop</div>
+        <div class="invoice-shop-sub">Medical Store & Pharmacy</div>
+      </div>
+      <div class="text-right">
+        <div class="invoice-title">TAX INVOICE</div>
+        <div class="font-mono text-primary">{{ savedBill()!.billNo }}</div>
+        <div class="invoice-date">Date: {{ savedBill()!.date }}</div>
+      </div>
+    </div>
+
+    <div class="invoice-customer">
+      <div>
+        <strong>Bill To:</strong><br />
+        {{ savedBill()!.customerName }}<br />
+        @if (savedBill()!.customerPhone) {
+          <span class="text-muted">📞 {{ savedBill()!.customerPhone }}</span>
+        }
+      </div>
+      @if (savedBill()!.doctorName) {
+        <div><strong>Doctor:</strong><br />{{ savedBill()!.doctorName }}</div>
+      }
+      <div>
+        <strong>Payment:</strong><br />
+        <span class="pay-mode">{{ savedBill()!.paymentMode }}</span>
+      </div>
+    </div>
+
+    <table class="invoice-table">
+      <thead>
+        <tr><th>#</th><th>Medicine</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>GST%</th><th>Amount</th></tr>
+      </thead>
+      <tbody>
+        @for (item of savedBill()!.items; track item.medicine?.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.medicineName || item.medicine?.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.rate || item.medicine?.sellingPrice }}</td>
+            <td>{{ item.discount }}%</td>
+            <td>{{ item.gst || item.medicine?.gst }}%</td>
+            <td>₹{{ item.total | number:'1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="invoice-totals">
+      <div class="total-line"><span>Subtotal</span><span>₹{{ savedBill()!.subtotal | number:'1.2-2' }}</span></div>
+      <div class="total-line"><span>Discount</span><span>- ₹{{ savedBill()!.totalDiscount | number:'1.2-2' }}</span></div>
+      <div class="total-line"><span>GST</span><span>₹{{ savedBill()!.totalGst | number:'1.2-2' }}</span></div>
+      <div class="total-line grand"><span>Grand Total</span><span>₹{{ savedBill()!.grandTotal | number:'1.2-2' }}</span></div>
+    </div>
+
+    <div class="invoice-footer">Thank you for your visit! • Get well soon 💊</div>
+  </div>
+
+  <div class="invoice-actions no-print">
+    <button class="btn btn-primary" (click)="printBill()">🖨️ Print Invoice</button>
+    <button class="btn btn-whatsapp" (click)="sendWhatsApp()" [disabled]="!savedBill()!.customerPhone">
+      📱 WhatsApp Bill
+    </button>
+    <button class="btn btn-ghost" (click)="newBill()">+ New Bill</button>
+  </div>
+}

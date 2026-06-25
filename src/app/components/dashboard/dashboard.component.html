@@ -1,0 +1,146 @@
+<!-- dashboard.component.html -->
+<div class="page-header">
+  <div>
+    <div class="page-title">Dashboard</div>
+    <div class="page-subtitle">Overview of your medical shop</div>
+  </div>
+  <a routerLink="/billing" class="btn btn-primary">+ New Bill</a>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">Loading dashboard...</div>
+} @else {
+
+  <!-- Stats -->
+  <div class="grid-4 mb-2">
+    <div class="stat-card">
+      <div class="stat-top">
+        <div class="stat-label">Today's Sales</div>
+        <div class="stat-icon blue">💰</div>
+      </div>
+      <div class="stat-value blue">₹{{ stats().todaySales | number:'1.0-0' }}</div>
+      <div class="stat-sub">{{ stats().todayBills }} bills today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-top">
+        <div class="stat-label">Monthly Sales</div>
+        <div class="stat-icon green">📈</div>
+      </div>
+      <div class="stat-value green">₹{{ stats().monthSales | number:'1.0-0' }}</div>
+      <div class="stat-sub">This month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-top">
+        <div class="stat-label">Low Stock</div>
+        <div class="stat-icon yellow">⚠️</div>
+      </div>
+      <div class="stat-value yellow">{{ stats().lowStockCount }}</div>
+      <div class="stat-sub">Items need restock</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-top">
+        <div class="stat-label">Total Medicines</div>
+        <div class="stat-icon purple">💊</div>
+      </div>
+      <div class="stat-value purple">{{ stats().totalMedicines }}</div>
+      <div class="stat-sub">In inventory</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Recent Bills -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Recent Bills</span>
+        <a routerLink="/billing" class="view-all">View all →</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bill No</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (bill of recentBills(); track bill.id) {
+              <tr>
+                <td class="font-mono bill-no">{{ bill.billNo }}</td>
+                <td>{{ bill.customerName }}</td>
+                <td class="fw-600">₹{{ bill.grandTotal | number:'1.2-2' }}</td>
+                <td>
+                  <span class="badge" [class]="bill.status === 'paid' ? 'badge-success' : 'badge-warning'">
+                    {{ bill.status }}
+                  </span>
+                </td>
+              </tr>
+            }
+            @if (recentBills().length === 0) {
+              <tr>
+                <td colspan="4" class="empty-cell">No bills yet</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Stock Alerts -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Stock Alerts</span>
+        <a routerLink="/stock" class="view-all">Manage →</a>
+      </div>
+
+      @if (lowStock().length === 0 && expiring().length === 0) {
+        <div class="healthy-msg">✅ All stocks are healthy!</div>
+      }
+
+      @for (med of lowStock(); track med.id) {
+        <div class="alert-row">
+          <div>
+            <div class="alert-name">{{ med.name }}</div>
+            <div class="alert-sub">Stock: {{ med.stock }} | Min: {{ med.minStock }}</div>
+          </div>
+          <span class="badge badge-danger">Low Stock</span>
+        </div>
+      }
+
+      @for (med of expiring(); track med.id) {
+        <div class="alert-row">
+          <div>
+            <div class="alert-name">{{ med.name }}</div>
+            <div class="alert-sub">Expires: {{ med.expiryDate }}</div>
+          </div>
+          <span class="badge badge-warning">Expiring</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Sales Chart -->
+  <div class="card mt-2">
+    <div class="card-header">
+      <span class="card-title">Monthly Sales Trend</span>
+    </div>
+    <div class="chart-area">
+      @for (d of salesData(); track d.month) {
+        <div class="bar-group">
+          <div class="bar-wrap">
+            <div class="bar"
+              [style.height.%]="maxSales() > 0 ? (d.sales / maxSales()) * 100 : 10"
+              [title]="'₹' + d.sales">
+              <span class="bar-val">₹{{ d.sales / 1000 | number:'1.0-0' }}k</span>
+            </div>
+          </div>
+          <div class="bar-label">{{ d.month }}</div>
+        </div>
+      }
+      @if (salesData().length === 0) {
+        <div class="empty-chart">No sales data yet</div>
+      }
+    </div>
+  </div>
+}

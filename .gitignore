@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+/node_modules
+ 
+# Angular build & cache
+.angular/
+dist/
+ 
+# Optional (recommended for Angular projects)
+.tmp/
+.out-tsc/
+coverage/

@@ -1,0 +1,163 @@
+<!-- medicine-search.component.html -->
+<div class="page-header">
+  <div>
+    <div class="page-title">Medicine Search</div>
+    <div class="page-subtitle">Search and view medicine details</div>
+  </div>
+</div>
+
+<!-- Search Bar -->
+<div class="card search-card mb-2">
+  <span class="search-icon">🔍</span>
+  <input class="search-input" [(ngModel)]="query"
+    (input)="onSearch()" placeholder="Search by name, generic, category or manufacturer..." />
+  @if (query) {
+    <button class="btn btn-ghost btn-sm" (click)="clearSearch()">✕ Clear</button>
+  }
+</div>
+
+<!-- Category Filters -->
+<div class="cat-filters mb-2">
+  @for (cat of categories(); track cat) {
+    <button class="btn btn-ghost btn-sm"
+      [class.active-cat]="activeCategory() === cat"
+      (click)="filterByCategory(cat)">
+      {{ cat }}
+    </button>
+  }
+</div>
+
+<!-- Search Results -->
+@if (query || activeCategory()) {
+  <div class="results-header mb-1">
+    <span class="text-muted results-count">
+      {{ results().length }} result{{ results().length !== 1 ? 's' : '' }}
+    </span>
+  </div>
+
+  @if (results().length === 0) {
+    <div class="card empty-state">
+      <div class="empty-icon">💊</div>
+      <div class="empty-title">No medicines found</div>
+      <div class="text-muted mt-1">Try a different search term</div>
+    </div>
+  } @else {
+    <div class="med-grid">
+      @for (med of results(); track med.id) {
+        <div class="med-card" (click)="selected.set(med)">
+          <div class="med-card-top">
+            <div>
+              <div class="med-name">{{ med.name }}</div>
+              <div class="med-generic">{{ med.genericName }}</div>
+            </div>
+            <span class="badge badge-primary">{{ med.category }}</span>
+          </div>
+          <div class="med-card-body">
+            <div class="med-detail"><span>🏭</span><span>{{ med.manufacturer }}</span></div>
+            <div class="med-detail">
+              <span>📦</span>
+              <span [class]="med.stock <= med.minStock ? 'text-danger fw-600' : 'text-success fw-600'">
+                {{ med.stock }} {{ med.unit }}
+              </span>
+            </div>
+            <div class="med-detail">
+              <span>📅</span>
+              <span [class]="isExpiring(med.expiryDate) ? 'text-warning' : ''">
+                Exp: {{ med.expiryDate }}
+              </span>
+            </div>
+            <div class="med-detail"><span>💊</span><span>Batch: {{ med.batchNo }}</span></div>
+          </div>
+          <div class="med-card-footer">
+            <div>
+              <div class="price-label">MRP</div>
+              <div class="price-value">₹{{ med.sellingPrice }}</div>
+            </div>
+            <div class="text-right">
+              <div class="price-label">GST</div>
+              <div class="fw-600">{{ med.gst }}%</div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+} @else {
+  <!-- All Medicines Table -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">All Medicines ({{ allMeds().length }})</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Generic</th><th>Category</th><th>Stock</th><th>MRP</th><th>Expiry</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          @for (med of allMeds(); track med.id) {
+            <tr class="clickable-row" (click)="selected.set(med)">
+              <td>
+                <div class="fw-600">{{ med.name }}</div>
+                <div class="med-mfr">{{ med.manufacturer }}</div>
+              </td>
+              <td>{{ med.genericName }}</td>
+              <td><span class="badge badge-primary">{{ med.category }}</span></td>
+              <td [class]="med.stock <= med.minStock ? 'text-danger fw-600' : ''">
+                {{ med.stock }} {{ med.unit }}
+              </td>
+              <td class="fw-600 text-primary">₹{{ med.sellingPrice }}</td>
+              <td [class]="isExpiring(med.expiryDate) ? 'text-warning' : ''">{{ med.expiryDate }}</td>
+              <td>
+                @if (med.stock === 0) { <span class="badge badge-danger">Out</span> }
+                @else if (med.stock <= med.minStock) { <span class="badge badge-warning">Low</span> }
+                @else { <span class="badge badge-success">Active</span> }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- Detail Modal -->
+@if (selected()) {
+  <div class="modal-backdrop" (click)="selected.set(null)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3>{{ selected()!.name }}</h3>
+          <div class="modal-sub">{{ selected()!.genericName }}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" (click)="selected.set(null)">✕</button>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-row"><span class="detail-label">Category</span><span class="badge badge-primary">{{ selected()!.category }}</span></div>
+        <div class="detail-row"><span class="detail-label">Manufacturer</span><span>{{ selected()!.manufacturer }}</span></div>
+        <div class="detail-row"><span class="detail-label">Batch No</span><span class="font-mono">{{ selected()!.batchNo }}</span></div>
+        <div class="detail-row"><span class="detail-label">Expiry Date</span>
+          <span [class]="isExpiring(selected()!.expiryDate) ? 'text-warning fw-600' : ''">{{ selected()!.expiryDate }}</span>
+        </div>
+        <div class="detail-row"><span class="detail-label">Unit</span><span>{{ selected()!.unit }}</span></div>
+        <div class="detail-row"><span class="detail-label">HSN Code</span><span class="font-mono">{{ selected()!.hsn }}</span></div>
+        <div class="detail-row"><span class="detail-label">GST</span><span>{{ selected()!.gst }}%</span></div>
+        <div class="detail-row"><span class="detail-label">Purchase Price</span><span>₹{{ selected()!.purchasePrice }}</span></div>
+        <div class="detail-row"><span class="detail-label">Selling Price</span>
+          <span class="fw-600 text-primary price-big">₹{{ selected()!.sellingPrice }}</span>
+        </div>
+        <div class="detail-row"><span class="detail-label">Current Stock</span>
+          <span [class]="selected()!.stock <= selected()!.minStock ? 'text-danger fw-600' : 'text-success fw-600'">
+            {{ selected()!.stock }} {{ selected()!.unit }}
+          </span>
+        </div>
+        <div class="detail-row"><span class="detail-label">Min Stock</span><span>{{ selected()!.minStock }}</span></div>
+      </div>
+      <div class="mt-2">
+        <span class="badge status-badge"
+          [class]="selected()!.stock === 0 ? 'badge-danger' : selected()!.stock <= selected()!.minStock ? 'badge-warning' : 'badge-success'">
+          {{ selected()!.stock === 0 ? 'Out of Stock' : selected()!.stock <= selected()!.minStock ? 'Low Stock' : 'Available' }}
+        </span>
+      </div>
+    </div>
+  </div>
+}

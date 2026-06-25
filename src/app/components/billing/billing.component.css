@@ -1,0 +1,90 @@
+/* billing.component.css */
+.search-input { width: 220px; }
+.empty-cell { text-align: center; color: #64748b; padding: 2rem; }
+.pay-mode { text-transform: capitalize; }
+
+/* Billing Grid */
+.billing-grid { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; align-items: start; }
+
+/* Medicine Search */
+.search-dropdown { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
+.search-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid #f1f5f9;
+  cursor: pointer; transition: background 0.1s;
+}
+.search-item:hover { background: #eff6ff; }
+.search-item:last-child { border-bottom: none; }
+.med-name { font-size: 13px; font-weight: 500; }
+.med-sub { font-size: 11px; color: #64748b; }
+
+/* Selected Medicine Row */
+.selected-med-row {
+  display: flex; align-items: flex-end; gap: 10px;
+  padding: 12px; background: #f8fafc; border-radius: 8px; flex-wrap: wrap;
+}
+.selected-med-row .flex-1 { flex: 1; min-width: 150px; }
+.qty-group { width: 90px; }
+.add-btn { margin-top: 20px; }
+
+/* Summary Card */
+.summary-card { position: sticky; top: 1rem; }
+.summary-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px;
+}
+.total-row { font-size: 16px; font-weight: 700; color: #0f172a; padding-top: 12px; border-bottom: none; }
+.summary-actions { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.empty-summary { text-align: center; color: #64748b; font-size: 12px; margin-top: 1rem; }
+
+/* Invoice */
+.invoice {
+  background: #fff; border: 1px solid #e2e8f0;
+  border-radius: 12px; padding: 2rem; max-width: 800px;
+}
+.invoice-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #0f172a;
+}
+.invoice-shop { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+.invoice-shop-sub { color: #64748b; font-size: 13px; }
+.invoice-title { font-size: 1.2rem; font-weight: 700; }
+.invoice-date { font-size: 12px; color: #64748b; }
+
+.invoice-customer {
+  display: flex; gap: 2rem; margin-bottom: 1.5rem;
+  padding: 1rem; background: #f8fafc; border-radius: 8px; font-size: 13px;
+}
+
+.invoice-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 1rem; }
+.invoice-table th { background: #0f172a; color: #fff; padding: 8px 10px; text-align: left; font-size: 11px; }
+.invoice-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; }
+
+.invoice-totals { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.total-line { display: flex; gap: 3rem; font-size: 13px; }
+.total-line.grand { font-size: 16px; font-weight: 700; border-top: 2px solid #0f172a; padding-top: 8px; margin-top: 4px; }
+
+.invoice-footer {
+  text-align: center; font-size: 12px; color: #64748b;
+  margin-top: 1.5rem; border-top: 1px dashed #e2e8f0; padding-top: 1rem;
+}
+
+.invoice-actions { display: flex; gap: 1rem; margin-top: 1rem; }
+
+/* WhatsApp Button */
+.btn-whatsapp {
+  background: #25d366; color: #fff;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px; font-size: 13px;
+  font-weight: 500; cursor: pointer; border: none; transition: all 0.15s;
+}
+.btn-whatsapp:hover { background: #128c7e; }
+.btn-whatsapp:disabled { background: #94a3b8; cursor: not-allowed; }
+
+@media print {
+  .no-print { display: none !important; }
+}
+
+@media (max-width: 768px) {
+  .billing-grid { grid-template-columns: 1fr; }
+}

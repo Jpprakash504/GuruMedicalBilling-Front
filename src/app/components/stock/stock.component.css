@@ -1,0 +1,35 @@
+/* stock.component.css */
+.filter-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.filter-input { width: 220px; }
+.filter-select { width: 160px; }
+.filter-count { font-size: 13px; color: #64748b; margin-left: auto; }
+
+.med-generic { font-size: 11px; color: #64748b; }
+.batch-no { font-size: 12px; }
+.empty-cell { text-align: center; color: #64748b; padding: 2rem; }
+
+.stock-pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.stock-ok { background: #f0fdf4; color: #16a34a; }
+.stock-low { background: #fef2f2; color: #dc2626; }
+
+.action-btns { display: flex; gap: 0.5rem; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 1rem;
+}
+.modal-box {
+  background: #fff; border-radius: 14px; padding: 1.75rem;
+  width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-sm { max-width: 400px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.modal-header h3 { font-size: 16px; font-weight: 700; }
+.modal-footer { display: flex; gap: 1rem; margin-top: 1.25rem; }
+
+.restock-name { font-size: 15px; }
+.restock-stock { font-size: 13px; color: #64748b; }
