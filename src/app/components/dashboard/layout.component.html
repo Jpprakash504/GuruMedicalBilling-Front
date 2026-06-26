@@ -6,7 +6,7 @@
     <div class="sidebar-header">
       <div class="logo">
         <span class="logo-icon">💊</span>
-        @if (!collapsed()) { <span class="logo-text">Guru Medical</span> }
+        @if (!collapsed()) { <span class="logo-text">MediShop</span> }
       </div>
       <button class="collapse-btn" (click)="collapsed.set(!collapsed())">
         {{ collapsed() ? '→' : '←' }}
@@ -38,6 +38,10 @@
       <a routerLink="/reports" routerLinkActive="active" class="nav-item">
         <span class="nav-icon">📊</span>
         @if (!collapsed()) { <span>Reports</span> }
+      </a>
+      <a routerLink="/settings" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        @if (!collapsed()) { <span>Settings</span> }
       </a>
     </nav>
 

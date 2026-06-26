@@ -13,6 +13,7 @@ export const routes: Routes = [
       { path: 'stock', loadComponent: () => import('./components/stock/stock.component').then(m => m.StockComponent) },
       { path: 'medicine-search', loadComponent: () => import('./components/medicine-search/medicine-search.component').then(m => m.MedicineSearchComponent) },
       { path: 'reports', loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent) },
+      { path: 'settings', loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent) },
     ]
   },
   { path: '**', redirectTo: '' }

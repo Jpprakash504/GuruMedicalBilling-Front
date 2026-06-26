@@ -1,0 +1,175 @@
+<!-- settings.component.html -->
+<div class="page-header">
+  <div>
+    <div class="page-title">Settings</div>
+    <div class="page-subtitle">Manage your account credentials</div>
+  </div>
+</div>
+
+<div class="settings-grid">
+
+  <!-- Profile Card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">👤 Profile</span>
+    </div>
+
+    <div class="profile-top">
+      <div class="avatar-big">{{ userInitials() }}</div>
+      <div>
+        <div class="profile-name">{{ currentUser()?.name }}</div>
+        <div class="profile-username">{{ currentUser()?.username }}</div>
+        <span class="badge" [class]="currentUser()?.role === 'admin' ? 'badge-primary' : 'badge-success'">
+          {{ currentUser()?.role }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Update Name -->
+    <div class="section-divider">Update Display Name</div>
+    <div class="form-group mb-2">
+      <label class="form-label">Display Name</label>
+      <input class="form-control" [(ngModel)]="newName" [placeholder]="currentUser()?.name || ''" />
+    </div>
+
+    @if (nameSuccess()) {
+      <div class="alert alert-success mb-1">✅ {{ nameSuccess() }}</div>
+    }
+    @if (nameError()) {
+      <div class="alert alert-danger mb-1">❌ {{ nameError() }}</div>
+    }
+
+    <button class="btn btn-primary" (click)="updateName()" [disabled]="nameSaving() || !newName">
+      {{ nameSaving() ? 'Saving...' : 'Update Name' }}
+    </button>
+  </div>
+
+  <!-- Change Username Card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🔑 Change Username</span>
+    </div>
+
+    <div class="form-group mb-2">
+      <label class="form-label">Current Username</label>
+      <input class="form-control" [value]="currentUser()?.username" disabled />
+    </div>
+
+    <div class="form-group mb-2">
+      <label class="form-label">New Username</label>
+      <input class="form-control" [(ngModel)]="newUsername"
+        placeholder="Enter new username" />
+    </div>
+
+    <div class="form-group mb-2">
+      <label class="form-label">Current Password (to confirm)</label>
+      <div class="pass-wrap">
+        <input class="form-control"
+          [type]="showPassUser() ? 'text' : 'password'"
+          [(ngModel)]="confirmPassForUsername"
+          placeholder="Enter your current password" />
+        <span class="pass-eye" (click)="showPassUser.set(!showPassUser())">
+          {{ showPassUser() ? '🙈' : '👁️' }}
+        </span>
+      </div>
+    </div>
+
+    @if (usernameSuccess()) {
+      <div class="alert alert-success mb-1">✅ {{ usernameSuccess() }}</div>
+    }
+    @if (usernameError()) {
+      <div class="alert alert-danger mb-1">❌ {{ usernameError() }}</div>
+    }
+
+    <button class="btn btn-primary"
+      (click)="changeUsername()"
+      [disabled]="usernameSaving() || !newUsername || !confirmPassForUsername">
+      {{ usernameSaving() ? 'Saving...' : 'Change Username' }}
+    </button>
+  </div>
+
+  <!-- Change Password Card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🔒 Change Password</span>
+    </div>
+
+    <div class="form-group mb-2">
+      <label class="form-label">Current Password</label>
+      <div class="pass-wrap">
+        <input class="form-control"
+          [type]="showCurrentPass() ? 'text' : 'password'"
+          [(ngModel)]="currentPassword"
+          placeholder="Enter current password" />
+        <span class="pass-eye" (click)="showCurrentPass.set(!showCurrentPass())">
+          {{ showCurrentPass() ? '🙈' : '👁️' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group mb-2">
+      <label class="form-label">New Password</label>
+      <div class="pass-wrap">
+        <input class="form-control"
+          [type]="showNewPass() ? 'text' : 'password'"
+          [(ngModel)]="newPassword"
+          placeholder="Min 6 characters" />
+        <span class="pass-eye" (click)="showNewPass.set(!showNewPass())">
+          {{ showNewPass() ? '🙈' : '👁️' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group mb-2">
+      <label class="form-label">Confirm New Password</label>
+      <div class="pass-wrap">
+        <input class="form-control"
+          [type]="showConfirmPass() ? 'text' : 'password'"
+          [(ngModel)]="confirmPassword"
+          placeholder="Re-enter new password" />
+        <span class="pass-eye" (click)="showConfirmPass.set(!showConfirmPass())">
+          {{ showConfirmPass() ? '🙈' : '👁️' }}
+        </span>
+      </div>
+      @if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+        <div class="pass-mismatch">⚠️ Passwords do not match</div>
+      }
+    </div>
+
+    <!-- Password Strength -->
+    @if (newPassword) {
+      <div class="pass-strength mb-2">
+        <div class="strength-label">Strength: <strong [class]="strengthClass()">{{ strengthText() }}</strong></div>
+        <div class="strength-bar">
+          <div class="strength-fill" [class]="strengthClass()" [style.width.%]="strengthPct()"></div>
+        </div>
+      </div>
+    }
+
+    @if (passSuccess()) {
+      <div class="alert alert-success mb-1">✅ {{ passSuccess() }}</div>
+    }
+    @if (passError()) {
+      <div class="alert alert-danger mb-1">❌ {{ passError() }}</div>
+    }
+
+    <button class="btn btn-primary"
+      (click)="changePassword()"
+      [disabled]="passSaving() || !currentPassword || !newPassword || newPassword !== confirmPassword">
+      {{ passSaving() ? 'Changing...' : '🔒 Change Password' }}
+    </button>
+  </div>
+
+  <!-- Security Tips -->
+  <div class="card tips-card">
+    <div class="card-header"><span class="card-title">🛡️ Security Tips</span></div>
+    <div class="tip-list">
+      <div class="tip-item">✅ Use at least 8 characters</div>
+      <div class="tip-item">✅ Mix letters, numbers & symbols</div>
+      <div class="tip-item">✅ Don't share your password</div>
+      <div class="tip-item">✅ Change password every 3 months</div>
+      <div class="tip-item">⚠️ Logout after each session on shared devices</div>
+    </div>
+  </div>
+
+</div>
