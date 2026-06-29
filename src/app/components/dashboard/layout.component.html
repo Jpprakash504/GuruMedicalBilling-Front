@@ -1,4 +1,4 @@
-<!-- layout.component.html -->
+<!-- layout.component.html - UPDATED WITH NEW NAV ITEMS -->
 <div class="layout">
 
   <!-- Sidebar -->
@@ -35,14 +35,34 @@
         <span class="nav-icon">🔍</span>
         @if (!collapsed()) { <span>Medicines</span> }
       </a>
+      <!-- <a routerLink="/patient-history" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📋</span>
+        @if (!collapsed()) { <span>Patients</span> }
+      </a> -->
       <a routerLink="/reports" routerLinkActive="active" class="nav-item">
         <span class="nav-icon">📊</span>
         @if (!collapsed()) { <span>Reports</span> }
       </a>
+
+      <!-- Divider -->
+      <!-- @if (!collapsed()) { <div class="nav-divider">ADMIN</div> }
+
+      <a routerLink="/staff" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">👥</span>
+        @if (!collapsed()) { <span>Staff</span> }
+      </a> -->
       <a routerLink="/settings" routerLinkActive="active" class="nav-item">
         <span class="nav-icon">⚙️</span>
         @if (!collapsed()) { <span>Settings</span> }
       </a>
+
+      <!-- PWA Install Button -->
+      @if (pwaInstallable()) {
+        <button class="nav-item pwa-install-btn" (click)="installPwa()">
+          <span class="nav-icon">📱</span>
+          @if (!collapsed()) { <span>Install App</span> }
+        </button>
+      }
     </nav>
 
     <div class="sidebar-footer">
@@ -68,6 +88,9 @@
           <div class="alert-chip" routerLink="/stock">
             ⚠️ {{ lowStockCount() }} low stock
           </div>
+        }
+        @if (pwaInstalled()) {
+          <div class="pwa-chip">📱 App Installed</div>
         }
       </div>
     </div>
