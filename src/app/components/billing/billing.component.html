@@ -254,10 +254,11 @@
   </div>
 
   <div class="invoice-actions no-print">
-    <button class="btn btn-primary" (click)="printBill()">🖨️ Print Invoice</button>
-    <button class="btn btn-whatsapp" (click)="sendWhatsApp()" [disabled]="!savedBill()!.customerPhone">
-      📱 WhatsApp Bill
-    </button>
-    <button class="btn btn-ghost" (click)="newBill()">+ New Bill</button>
-  </div>
+  <button class="btn btn-primary" (click)="printBill()">🖨️ Print Invoice</button>
+  <button class="btn btn-pdf" (click)="downloadPdf()">📄 Download PDF</button>
+  <button class="btn btn-whatsapp" (click)="sendWhatsApp()" [disabled]="!savedBill()!.customerPhone">
+    📱 WhatsApp PDF
+  </button>
+  <button class="btn btn-ghost" (click)="newBill()">+ New Bill</button>
+</div>
 }

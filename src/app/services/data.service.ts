@@ -5,7 +5,6 @@ import { environment } from 'src/environment';
 
 // export const API_URL = 'http://localhost:3000/api';
 export const API_URL =environment.apiUrl
-
 @Injectable({ providedIn: 'root' })
 export class DataService {
 
@@ -106,18 +105,18 @@ export class DataService {
       customerPhone: bill.customerPhone,
       doctorName: bill.doctorName,
       paymentMode: bill.paymentMode,
-      subtotal: bill.subtotal,
-      totalDiscount: bill.totalDiscount,
-      totalGst: bill.totalGst,
-      grandTotal: bill.grandTotal,
+      subtotal: Number(bill.subtotal),
+      totalDiscount: Number(bill.totalDiscount),
+      totalGst: Number(bill.totalGst),
+      grandTotal: Number(bill.grandTotal),
       items: bill.items.map((i: any) => ({
         medicineId: i.medicine.id,
         medicineName: i.medicine.name,
-        quantity: i.quantity,
-        rate: i.medicine.sellingPrice,
-        discount: i.discount,
-        gst: i.medicine.gst,
-        total: i.total,
+        quantity: Number(i.quantity),
+        rate: Number(i.medicine.sellingPrice),
+        discount: Number(i.discount) || 0,
+        gst: Number(i.medicine.gst) || 0,
+        total: Number(i.total),
       }))
     };
     const data = await firstValueFrom(
